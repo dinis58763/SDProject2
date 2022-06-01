@@ -6,6 +6,7 @@ import tp2.api.service.java.Users;
 import tp2.impl.clients.common.RetryDirectoryClient;
 import tp2.impl.clients.common.RetryFilesClient;
 import tp2.impl.clients.common.RetryUsersClient;
+// import tp2.impl.clients.rest.RepRestDirClient;
 import tp2.impl.clients.rest.RestDirectoryClient;
 import tp2.impl.clients.rest.RestFilesClient;
 import tp2.impl.clients.rest.RestUsersClient;
@@ -17,7 +18,7 @@ public class Clients {
 
 	public static final ClientFactory<Directory> DirectoryClients = new ClientFactory<>(
 			Directory.SERVICE_NAME, 
-			(u) -> new RetryDirectoryClient( new RestDirectoryClient(u)), 
+			(u) -> new RetryDirectoryClient( new RestDirectoryClient(u)), // Be careful here, I changed it
 			(u) -> new RetryDirectoryClient( new SoapDirectoryClient(u))
 	);
 

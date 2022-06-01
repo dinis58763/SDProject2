@@ -9,7 +9,6 @@ import tp2.impl.clients.Clients;
 import tp2.impl.service.rest.DirectoryRestServer;
 import tp2.impl.service.rest.FilesRestServer;
 import tp2.impl.service.rest.UsersRestServer;
-import util.Debug;
 
 public class Test {
 
@@ -17,9 +16,6 @@ public class Test {
 		UsersRestServer.main( new String[] { "xxx" });
 		DirectoryRestServer.main( new String[] {"xxx"});
 		FilesRestServer.main(new String[] {"xxx"});
-
-		
-		Debug.setLogLevel(Level.INFO, "");
 		
 		Users us = Clients.UsersClients.get();
 		

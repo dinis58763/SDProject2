@@ -27,11 +27,12 @@ import java.util.stream.Stream;
 import tp2.api.FileInfo;
 import tp2.api.User;
 import tp2.api.service.java.Directory;
+import tp2.api.service.java.RepDirectory;
 import tp2.api.service.java.Result;
 import tp2.api.service.java.Result.ErrorCode;
 import util.Token;
 
-public class JavaDirectory implements Directory {
+public class JavaDirectory implements Directory, RepDirectory {
 
 	private static final long USER_CACHE_CAPACITY = 32;
 	private static final long USER_CACHE_EXPIRATION = 500;
@@ -276,5 +277,170 @@ public class JavaDirectory implements Directory {
 		static int ascending(FileCounts a, FileCounts b) {
 			return Long.compare( a.numFiles().get(), b.numFiles().get());
 		}
+	}
+
+	@Override
+	public Result<FileInfo> writeFile(Long version, String filename, byte[] data, String userId, String password) {
+		if (badParam(filename) || badParam(userId))
+			return error(BAD_REQUEST);
+
+		var user = getUser(userId, password);
+		if (!user.isOK())
+			return error(user.error());
+
+		var uf = userFiles.computeIfAbsent(userId, (k) -> new UserFiles());
+		synchronized (uf) {
+			var fileId = fileId(filename, userId);
+			var file = files.get(fileId);
+			var info = file != null ? file.info() : new FileInfo();
+			for (var uri :  orderCandidateFileServers(file)) {
+				var result = FilesClients.get(uri).writeFile(fileId, data, Token.get());
+				if (result.isOK()) {
+					info.setOwner(userId);
+					info.setFilename(filename);
+					info.setFileURL(String.format("%s/files/%s", uri, fileId));
+					files.put(fileId, file = new ExtendedFileInfo(uri, fileId, info));
+					if( uf.owned().add(fileId))
+						getFileCounts(file.uri(), true).numFiles().incrementAndGet();
+					return ok(file.info());
+				} else
+					Log.info(String.format("Files.writeFile(...) to %s failed with: %s \n", uri, result));
+			}
+			return error(BAD_REQUEST);
+		}
+	}
+
+
+	@Override
+	public Result<Void> deleteFile(Long version, String filename, String userId, String password) {
+		if (badParam(filename) || badParam(userId))
+			return error(BAD_REQUEST);
+
+		var fileId = fileId(filename, userId);
+
+		var file = files.get(fileId);
+		if (file == null)
+			return error(NOT_FOUND);
+
+		var user = getUser(userId, password);
+		if (!user.isOK())
+			return error(user.error());
+
+		var uf = userFiles.getOrDefault(userId, new UserFiles());
+		synchronized (uf) {
+			var info = files.remove(fileId);
+			uf.owned().remove(fileId);
+
+			executor.execute(() -> {
+				this.removeSharesOfFile(info);
+				FilesClients.get(file.uri()).deleteFile(fileId, password);
+			});
+			
+			getFileCounts(info.uri(), false).numFiles().decrementAndGet();
+		}
+		return ok();
+	}
+
+
+	@Override
+	public Result<Void> shareFile(Long version, String filename, String userId, String userIdShare, String password) {
+		if (badParam(filename) || badParam(userId) || badParam(userIdShare))
+			return error(BAD_REQUEST);
+
+		var fileId = fileId(filename, userId);
+
+		var file = files.get(fileId);
+		if (file == null || getUser(userIdShare, "").error() == NOT_FOUND)
+			return error(NOT_FOUND);
+
+		var user = getUser(userId, password);
+		if (!user.isOK())
+			return error(user.error());
+
+		var uf = userFiles.computeIfAbsent(userIdShare, (k) -> new UserFiles());
+		synchronized (uf) {
+			uf.shared().add(fileId);
+			file.info().getSharedWith().add(userIdShare);
+		}
+
+		return ok();
+	}
+
+
+	@Override
+	public Result<Void> unshareFile(Long version, String filename, String userId, String userIdShare, String password) {
+		if (badParam(filename) || badParam(userId) || badParam(userIdShare))
+			return error(BAD_REQUEST);
+
+		var fileId = fileId(filename, userId);
+
+		var file = files.get(fileId);
+		if (file == null || getUser(userIdShare, "").error() == NOT_FOUND)
+			return error(NOT_FOUND);
+
+		var user = getUser(userId, password);
+		if (!user.isOK())
+			return error(user.error());
+
+		var uf = userFiles.computeIfAbsent(userIdShare, (k) -> new UserFiles());
+		synchronized (uf) {
+			uf.shared().remove(fileId);
+			file.info().getSharedWith().remove(userIdShare);
+		}
+
+		return ok();
+	}
+
+
+	@Override
+	public Result<byte[]> getFile(Long version, String filename, String userId, String accUserId, String password) {
+		if (badParam(filename))
+			return error(BAD_REQUEST);
+
+		var fileId = fileId(filename, userId);
+		var file = files.get(fileId);
+		if (file == null)
+			return error(NOT_FOUND);
+
+		var user = getUser(accUserId, password);
+		if (!user.isOK())
+			return error(user.error());
+
+		if (!file.info().hasAccess(accUserId))
+			return error(FORBIDDEN);
+		
+		return redirect( file.info().getFileURL() );
+	}
+
+
+	@Override
+	public Result<List<FileInfo>> lsFile(Long version, String userId, String password) {
+		if (badParam(userId))
+			return error(BAD_REQUEST);
+
+		var user = getUser(userId, password);
+		if (!user.isOK())
+			return error(user.error());
+
+		var uf = userFiles.getOrDefault(userId, new UserFiles());
+		synchronized (uf) {
+			var infos = Stream.concat(uf.owned().stream(), uf.shared().stream()).map(f -> files.get(f).info())
+					.collect(Collectors.toSet());
+
+			return ok(new ArrayList<>(infos));
+		}
+	}
+
+
+	@Override
+	public Result<Void> deleteUserFiles(Long version, String userId, String password, String token) {
+		var fileIds = userFiles.remove(userId);
+		if (fileIds != null)
+			for (var id : fileIds.owned()) {
+				var file = files.remove(id);
+				removeSharesOfFile(file);
+				getFileCounts(file.uri(), false).numFiles().decrementAndGet();
+			}
+		return ok();
 	}	
 }

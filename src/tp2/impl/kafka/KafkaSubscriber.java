@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 public class KafkaSubscriber {
+	
 	static public KafkaSubscriber createSubscriber(String brokers, List<String> topics, String mode) {
 
 		Properties props = new Properties();

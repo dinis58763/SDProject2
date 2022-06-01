@@ -5,8 +5,7 @@ import java.net.URI;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import tp2.api.service.rest.RestDirectory;
-import tp2.api.FileInfo;
+import tp2.api.service.rest.RepRestDirectory;
 import tp2.api.service.java.Result;
 
 public class RestResource {
@@ -23,13 +22,16 @@ public class RestResource {
 	}
 	
 	protected <T> T resultOrThrowVersion(Result<T> result, Long version) {
-		if (result.isOK())
-			throw new WebApplicationException(Response.ok().header(RestDirectory.HEADER_VERSION, version)
+		System.out.println("VERSION REST RESOURCE --->>>> " + version);
+		if (result.isOK()) {
+			System.out.println("REST RESOURCE IF CORRECT VERSION --->>>> " + version);
+			throw new WebApplicationException(Response.ok().header(RepRestDirectory.HEADER_VERSION, version)
 					.entity(result.value()).build());
+		}
 		else
 			throw new WebApplicationException(statusCode(result));
 	}
-
+	
 	/**
 	 * Translates a Result<T> to a HTTP Status code
 	 */
