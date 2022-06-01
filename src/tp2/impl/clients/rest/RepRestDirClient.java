@@ -28,7 +28,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 				.path(filename)
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1) //.header(RepRestDirectory.HEADER_VERSION, version)
+				.header(RepRestDirectory.HEADER_VERSION, version) //.header(RepRestDirectory.HEADER_VERSION, version)
 				.accept(MediaType.APPLICATION_JSON)
 				.post(Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM));
 		return super.responseContents(r, Status.OK, new GenericType<FileInfo>() {});
@@ -40,7 +40,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 				.path(filename)
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1)
+				.header(RepRestDirectory.HEADER_VERSION, version) //.header(RepRestDirectory.HEADER_VERSION, 1)
 				.delete();
 		return super.verifyResponse(r, Status.NO_CONTENT);
 	}
@@ -53,7 +53,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 				.path( userIdShare)
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1)
+				.header(RepRestDirectory.HEADER_VERSION, version) // .header(RepRestDirectory.HEADER_VERSION, 1)
 				.post(Entity.json(null));		
 		return super.verifyResponse(r, Status.NO_CONTENT);
 	}
@@ -66,7 +66,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 				.path( userIdShare)
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1)
+				.header(RepRestDirectory.HEADER_VERSION, version) //.header(RepRestDirectory.HEADER_VERSION, 1)
 				.delete();
 		return super.verifyResponse(r, Status.NO_CONTENT);
 	}
@@ -78,7 +78,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 				.queryParam(RepRestDirectory.ACC_USER_ID, accUserId)
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1)
+				.header(RepRestDirectory.HEADER_VERSION, version) //.header(RepRestDirectory.HEADER_VERSION, 1)
 				.accept(MediaType.APPLICATION_OCTET_STREAM)
 				.get();
 		return super.responseContents(r, Status.OK, new GenericType<byte[]>() {});
@@ -89,7 +89,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 		Response r = target.path(userId)
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1)
+				.header(RepRestDirectory.HEADER_VERSION, version) //.header(RepRestDirectory.HEADER_VERSION, 1)
 				.accept(MediaType.APPLICATION_JSON)
 				.get();
 		return super.responseContents(r, Status.OK, new GenericType<List<FileInfo>>() {});
@@ -101,7 +101,7 @@ public class RepRestDirClient extends RestClient implements RepDirectory {
 				.queryParam(RepRestDirectory.PASSWORD, password)
 				.queryParam(RepRestDirectory.TOKEN, token)
 				.request()
-				.header(RepRestDirectory.HEADER_VERSION, 1)
+				.header(RepRestDirectory.HEADER_VERSION, version) //.header(RepRestDirectory.HEADER_VERSION, 1)
 				.delete();
 		return super.verifyResponse(r, Status.NO_CONTENT);
 	}
