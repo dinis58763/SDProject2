@@ -63,5 +63,4 @@ public class DeleteFile {
 		cd.execute(path);
 		System.out.println("File on path '" + path + "' deleted successfuly.");
 	}
-
 }

@@ -6,6 +6,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import tp2.api.service.rest.RepRestDirectory;
+import tp2.api.service.rest.RestDirectory;
 import tp2.api.service.java.Result;
 
 public class RestResource {
@@ -25,8 +26,9 @@ public class RestResource {
 		System.out.println("VERSION REST RESOURCE --->>>> " + version);
 		if (result.isOK()) {
 			System.out.println("REST RESOURCE IF CORRECT VERSION --->>>> " + version);
-			throw new WebApplicationException(Response.ok().header(RepRestDirectory.HEADER_VERSION, version)
+			throw new WebApplicationException(Response.ok(result.value()).header(RepRestDirectory.HEADER_VERSION, version)
 					.entity(result.value()).build());
+			// return result.value()
 		}
 		else
 			throw new WebApplicationException(statusCode(result));

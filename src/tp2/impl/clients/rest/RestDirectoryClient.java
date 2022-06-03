@@ -15,7 +15,6 @@ import tp2.api.service.rest.RestDirectory;
 
 public class RestDirectoryClient extends RestClient implements Directory {
 
-
 	private static final String SHARE = "share";
 	
 	public RestDirectoryClient(URI serverUri) {
@@ -29,6 +28,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
 				.path(filename)
 				.queryParam(RestDirectory.PASSWORD, password)
 				.request()
+				// .header(RestDirectory.HEADER_VERSION, 1) //.header(RepRestDirectory.HEADER_VERSION, version)
 				.accept(MediaType.APPLICATION_JSON)
 				.post(Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM));
 		return super.responseContents(r, Status.OK, new GenericType<FileInfo>() {});

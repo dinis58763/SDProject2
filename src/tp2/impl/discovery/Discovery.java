@@ -1,6 +1,5 @@
 package tp2.impl.discovery;
 
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-import tp2.api.service.java.RepDirectory;
+import tp2.api.service.java.Directory;
 import tp2.impl.kafka.KafkaPublisher;
 import tp2.impl.kafka.KafkaSubscriber;
 import tp2.impl.kafka.KafkaUtils;
@@ -27,7 +27,7 @@ public class RepDirServer extends AbstractRestServer {
 	static int MAX_NUM_THREADS = 3;
 
 	public RepDirServer(int port) {	
-		super(Log, RepDirectory.SERVICE_NAME, port);
+		super(Log, Directory.SERVICE_NAME, port);
 		// this.sender = KafkaPublisher.createPublisher(KAFKA_BROKERS);
 		// this.receiver = KafkaSubscriber.createSubscriber(KAFKA_BROKERS, List.of(TOPIC), FROM_BEGINNING);
 		// System.out.println("CHEGUEI REP DIR SERVER CONSTRUCTOR ---->>>> ");	
